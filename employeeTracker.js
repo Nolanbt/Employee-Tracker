@@ -47,7 +47,7 @@ function init() {
                     viewEmployees();
                     break;
                 case "View All Employees by Department":
-                    console.log(action + " Add this function")
+                    viewDepartment();
                     break;
                 case "View All Employees by Manager":
                     console.log(action + " Add this function")
@@ -94,4 +94,18 @@ function viewEmployees() {
             console.log(cTable.getTable(table));
             init();
         });
+}
+
+function viewDepartment () {
+    inquirer
+        .prompt([
+            {
+                tpye: "list",
+                message: "Select the department you would like to view",
+                choices: ["Sales", "Finance", "Engineering", "Legal"] ,
+                name: "department"
+            }
+        ]).then(({department})=>{
+            connection.query()
+        })
 }
