@@ -88,7 +88,7 @@ function viewEmployees() {
                             title: res[i].title,
                             department: res[i].name,
                             salary: res[i].salary,
-                            manager: "null"
+                            manager_id: "null"
                         }
                     )
                 }
@@ -101,7 +101,7 @@ function viewEmployees() {
                             title: res[i].title,
                             department: res[i].name,
                             salary: res[i].salary,
-                            manager: `${res[res[i].manager_id].first_name} ${res[res[i].manager_id].last_name}`
+                            manager_id: res[i].manager_id
                         }
                     )
                 }
@@ -131,7 +131,6 @@ function viewDepartment() {
             [task],
             (err,res)=>{
                 if (err) throw err;
-                console.log(res);
                 let table = [];
                 for (let i in res){
                     table.push(
@@ -168,7 +167,6 @@ function viewByRole() {
             [task],
             (err,res)=>{
                 if (err) throw err;
-                console.log(res);
                 let table = [];
                 for (let i in res){
                     table.push(
@@ -187,7 +185,6 @@ function viewByRole() {
 }
 
 function addEmployee () {
-    roles = ["Sales Lead", "Salesperson", "Account Manager", "Accountant", "Lead Engineer", "Software Engineer", "Legal Team Lead","Lawyer"]
     inquirer
         .prompt([
             {
@@ -202,8 +199,16 @@ function addEmployee () {
             },
             {
                 type: "list",
-                message: "What is the role of the new employee?",
-                choices: roles,
+                message: `What is the role of the new employee? 
+                1.) Sales Lead 
+                2.) Salesperson 
+                3.) Account Manager
+                4.) Accountant 
+                5.) Lead Engineer 
+                6.) Software Engineer 
+                7.) Legal Team Lead 
+                8.) Lawyer`,
+                choices: [1,2,3,4,5,6,7,8],
                 name: "role_id"
             }
         ])
@@ -212,12 +217,121 @@ function addEmployee () {
             {
                 first_name: answer.first_name,
                 last_name: answer.last_name,
-                role_id: parseInt(roles[answer.role_id] + 1)
+                role_id: answer.role_id
             },
             (err,res)=> {
                 if (err) throw err;
-                console.log(res);
+                console.log("You have added a new employee.");
+                init();
             }
             )
         })
+}
+
+function addRole() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is title of the new role?",
+                name: "title"
+            },
+            {
+                type: "input",
+                message: "What is the salary of this role?",
+                name: "salary"
+            },
+            {
+                type: "list",
+                message: `What is the department id of this role?
+                1.) Sales
+                2.) Finance
+                3.) Engineering
+                4.) Legal
+                5.) HR`,
+                choices: [1,2,3,4,5],
+                name: "department_id"
+            }
+        ]).then((answers) => {
+            connection.query("INSERT INTO role SET ?",
+            {
+                title: answers.title,
+                salary: answers.salary,
+                department_id: answers.department_id
+            },
+            (err, res)=>{
+                if (err) throw err;
+                console.log("You have added a new role!");
+                connection.query("SELECT * FROM role", (err,res)=>{
+                    console.log(res);
+                })
+                init();
+            }
+            )
+        })
+}
+
+function addDepartment () {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is the new department you would like to add?",
+                name: "department_name"
+            }
+        ]).then ((answers)=>{
+            connection.query("INSERT INTO department SET ?",
+            {
+                name: answers.department_name
+            },
+            (err,res)=>{
+                if (err) throw err;
+                console.log("You have added a new department!")
+                connection.query("SELECT * FROM department", (err,res)=>{
+                    console.log(res);
+                })
+                init();
+            }
+            )
+        })
+}
+
+function updateRole () {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Select the employee who you would like to update.",
+                choices: ["Nolan", "Brad", "Larraine", "Kyle", "Jennifer", "Rachel"],
+                name: "person"
+            },
+            {
+                type: "list",
+                message: `Select the new role.
+                1.) Sales Lead 
+                2.) Salesperson 
+                3.) Account Manager
+                4.) Accountant 
+                5.) Lead Engineer 
+                6.) Software Engineer 
+                7.) Legal Team Lead 
+                8.) Lawyer`,
+                choices: [1,2,3,4,5,6,7,8],
+                name: "newRole"
+            }
+        ]).then((answer=>{
+            console.log(answer.person);
+            connection.query("UPDATE employee SET ? WHERE ?", [
+                {
+                    role_id: answer.newRole
+                },
+                {
+                    first_name: answer.person
+                }
+            ],
+            (err, res)=>{
+                if (err) throw err;
+                console.log("Updated Role!")
+            })
+        }))
 }
